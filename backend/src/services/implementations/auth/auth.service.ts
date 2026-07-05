@@ -20,7 +20,8 @@ export class AuthService implements IAuthService{
     async signin(data: signinDto): Promise<signinResult> {
         try {
             console.log('AuthService',data)
-            const exist = await this.userRepository.findUserByEmail(data.email)
+            const userData=data
+            const exist = await this.userRepository.findUserByEmail(userData.email)
             console.log('exist',exist)
             if(!exist){
                 throw new Error('Invalid username ')
