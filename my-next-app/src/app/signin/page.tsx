@@ -1,13 +1,6 @@
-import React from 'react'
 import SignInForm from '@/src/components/auth/SignInForm'
+import React from 'react'
 
-function signIn() {
-  return (
-    <div>
-      <h1>signIn page</h1>
-      <SignInForm/>
-    </div>
-  )
+export default function Page() {
+  return <SignInForm/>
 }
-
-export default signIn

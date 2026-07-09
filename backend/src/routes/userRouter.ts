@@ -4,7 +4,7 @@ import { authController } from "../controllers/implementations/auth.controllers"
 
 const router = Router()
 
-router.post("/sinIn",authController.signin.bind(authController))   
-router.post("/sinUp",authController.signup.bind(authController))   
+router.post("/signIn",authController.signin.bind(authController))   
+router.post("/signUp",authController.signup.bind(authController))   
 
 export default router;

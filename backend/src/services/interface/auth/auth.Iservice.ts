@@ -1,8 +1,8 @@
 import { signinDto } from "../../../dto/user/auth.dtos";
-import { signinResult } from "../../../interfaces/interfaces";
+import { AuthResponse, signinResult } from "../../../interfaces/interfaces";
 
 
 export interface IAuthService{
     signin(data:signinDto):Promise<signinResult>
-    signup(data:signinDto):Promise<signinResult>
+    signup(data:signinDto):Promise<AuthResponse>
 }

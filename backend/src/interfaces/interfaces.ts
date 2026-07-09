@@ -7,13 +7,13 @@
     // otp?: string;
   }
   export interface signinResult extends AuthResponse {
-    accessToken?: string;
-    refreshToken?: string;
+    accessToken: string;
+    refreshToken: string;
     // name?: string;
     // role?: string;
     // userId?: string;
     // pic?: string;
-    user?: {
+    user: {
       // id: string;
       name: string;
       email: string;
