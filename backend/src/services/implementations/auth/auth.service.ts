@@ -5,7 +5,7 @@ import { UserRepository } from "../../../repositories/implementations/user.repos
 import { IUserRepository } from "../../../repositories/interface/user/user.Irepository";
 import { AppError } from "../../../validations/customError";
 import { IAuthService } from "../../interface/auth/auth.Iservice";
-import Container, { Inject, Service } from "typedi";
+import  {Container,Inject, Service } from "typedi";
 import bcrypt from "bcrypt";
 import { IBaseRepository } from "../../../repositories/interface/base.IRepository";
 import { IUser } from "../../../models/userModel";
@@ -24,7 +24,7 @@ export class AuthService implements IAuthService {
 
   async signin(data: signinDto): Promise<signinResult> {
     try {
-      console.log("AuthService", data);
+      console.log("AuthService", data.email);
       const exist = await this.userRepository.findUserByEmail(data.email);
       console.log("exist", exist);
       if (!exist) {
@@ -86,6 +86,5 @@ export class AuthService implements IAuthService {
     }
   }
 }
-export const authService = Container.get(AuthService);
-console.log(authService);
-console.log(typeof authService.signin);
+ export const authService = Container.get(AuthService);
+

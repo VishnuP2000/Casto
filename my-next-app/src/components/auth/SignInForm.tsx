@@ -25,7 +25,7 @@ export default function SignInForm() {
 
       router.push("/home");
     } catch (err) {
-      console.log(err);
+      console.log("err",err);
     }
   };
 

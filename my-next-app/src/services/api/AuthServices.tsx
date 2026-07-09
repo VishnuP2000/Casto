@@ -8,3 +8,8 @@ export const signIn = async (data: {email: string;password: string;}) => {
   console.log('localStorage',localStorage.getItem('accessToken'))
   return response.data;
 };
+export const signUp = async (data: {name:string,email: string;password: string;}) => {
+  const response = await publicAxios.post("/user/signUp", data);
+  console.log('response',response)
+  return response.data;
+};

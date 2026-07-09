@@ -8,18 +8,30 @@ import {
   FaLock,
   FaGoogle,
 } from "react-icons/fa";
+import { signUp } from "@/src/services/api/AuthServices";
+import { useRouter } from "next/navigation";
 
 export default function SignUpForm() {
+  const router=useRouter()
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (
+  const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
     console.log("name,email,password",name,email,password);
-    // let response=await servi
+    try {
+      await signUp({
+        name,
+        email,
+        password
+      })
+      router.push('/signin')
+    } catch (error) {
+      console.log('error',error)
+    }
   };
 
   return (
