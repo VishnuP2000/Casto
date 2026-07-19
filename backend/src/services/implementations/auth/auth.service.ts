@@ -14,6 +14,7 @@ import {
   generateRefreshToken,
 } from "../../../utils/jwt";
 import { hashedPassword } from "../../../utils/password.hash";
+import cloudinary from "../../../config/cloudinary";
 @Service()
 export class AuthService implements IAuthService {
   constructor(
@@ -55,11 +56,14 @@ export class AuthService implements IAuthService {
       );
     }
   }
-  async signup(userData: signinDto): Promise<AuthResponse> {
+  async signup(userData: signinDto,data): Promise<AuthResponse> {
     try {
+      let images;
       console.log("userData", userData);
       const { name, email, password } = userData;
       const pass = password;
+      
+
 
       const isExist = await this.userRepository.findUserByEmail(email);
       if (isExist) {
@@ -72,6 +76,7 @@ export class AuthService implements IAuthService {
         name: name,
         email: email,
         password: hashedPasswordResult,
+        image:data.image
       });
 
       return {

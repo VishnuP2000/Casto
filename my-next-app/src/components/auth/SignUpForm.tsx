@@ -1,128 +1,307 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import {
-  FaUser,
-  FaEnvelope,
-  FaLock,
-  FaGoogle,
-} from "react-icons/fa";
-import { signUp } from "@/src/services/api/AuthServices";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, User, AtSign, Phone, CheckCircle2 } from "lucide-react";
+import { FaGoogle, FaGithub } from "react-icons/fa";
+
+import AuthLayout from "./AuthLayout";
+import { InputField, PasswordInput } from "./InputField";
+import {
+  AuthLogo,
+  AuthButton,
+  SocialButton,
+  Divider,
+  PasswordStrength,
+} from "./AuthWidgets";
+import { signUp } from "@/services/api/AuthServices";
+
+// ─── Zod Schema ───────────────────────────────────────────────────────────────
+
+const signUpSchema = z.object({
+  fullName: z
+    .string()
+    .min(1, "Full name is required")
+    .max(60, "Name is too long"),
+
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Enter a valid email address"),
+
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 digits")
+    .regex(/^\d+$/, "Password must contain only numbers"),
+});
+
+type SignUpFormData = z.infer<typeof signUpSchema>;
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+
+interface ToastProps {
+  type: "success" | "error";
+  message: string;
+}
+
+function Toast({ type, message }: ToastProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -16, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+      className={[
+        "flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium border",
+        type === "success"
+          ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-300"
+          : "bg-rose-500/10 border-rose-500/25 text-rose-300",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "w-2 h-2 rounded-full flex-shrink-0",
+          type === "success" ? "bg-emerald-400" : "bg-rose-400",
+        ].join(" ")}
+      />
+      {message}
+    </motion.div>
+  );
+}
+
+// ─── Success Overlay ──────────────────────────────────────────────────────────
+
+function SuccessOverlay() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center justify-center py-16 gap-5 text-center"
+    >
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 200, damping: 12, delay: 0.1 }}
+        className="w-20 h-20 rounded-full bg-emerald-500/15 border-2 border-emerald-500/40 flex items-center justify-center"
+      >
+        <CheckCircle2 size={40} className="text-emerald-400" />
+      </motion.div>
+      <div>
+        <h3 className="text-xl font-bold text-white">Account Created!</h3>
+        <p className="text-sm text-[#64748b] mt-1.5">
+          Welcome to Casto. Redirecting you to sign in…
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── SignUp Form ──────────────────────────────────────────────────────────────
 
 export default function SignUpForm() {
-  const router=useRouter()
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const [toast, setToast] = useState<ToastProps | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [image, setImage] = useState<File | null>(null);
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-    console.log("name,email,password",name,email,password);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting, touchedFields },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    mode: "onChange",
+  });
+
+  const passwordValue = watch("password", "");
+
+  const onSubmit = async (data: SignUpFormData) => {
+    setToast(null);
+    console.log("enter the onsubmit");
     try {
       await signUp({
-        name,
-        email,
-        password
-      })
-      router.push('/signin')
-    } catch (error) {
-      console.log('error',error)
+        name: data.fullName,
+        email: data.email,
+        password: data.password,
+        image:image
+      });
+      setSuccess(true);
+      setTimeout(() => router.push("/signin"), 2000);
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? "Registration failed. Please try again.";
+      setToast({ type: "error", message: msg });
     }
   };
 
+  const containerVariants = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.065 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 14 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.42, ease: "easeOut" as const },
+    },
+  };
+
+  if (success) {
+    return (
+      <AuthLayout
+        leftHeadline="Your casting journey starts today."
+        leftSubtext="Join 50,000+ artists and 1,200+ production houses already using Casto to connect, audition, and succeed."
+      >
+        <SuccessOverlay />
+      </AuthLayout>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center px-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8">
-
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-600">
-            Casto
-          </h1>
-
-          <p className="text-gray-500 mt-2">
-            Create your account 🚀
+    <AuthLayout
+      leftHeadline="Your casting journey starts today."
+      leftSubtext="Join 50,000+ artists and 1,200+ production houses already using Casto to connect, audition, and succeed."
+    >
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="flex flex-col gap-4"
+      >
+        {/* Logo + Header */}
+        <motion.div variants={itemVariants}>
+          <AuthLogo />
+          <h1 className="text-2xl font-bold text-white">Create your account</h1>
+          <p className="text-sm text-[#64748b] mt-1">
+            Start your acting journey on Casto for free.
           </p>
-        </div>
+        </motion.div>
 
+        {/* Toast */}
+        <AnimatePresence mode="wait">
+          {toast && (
+            <motion.div variants={itemVariants} key="toast">
+              <Toast type={toast.type} message={toast.message} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Form */}
+        {/* Form */}
         <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
+          onSubmit={handleSubmit(onSubmit, (errors) => {
+            console.log("Validation errors", errors);
+          })}
+          noValidate
+          className="flex flex-col gap-3.5"
         >
-          {/* Name */}
-          <div className="relative">
-            <FaUser className="absolute left-4 top-4 text-gray-400" />
+          <label className="text-sm text-gray-300">Profile Image</label>
 
-            <input
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              if (e.target.files?.length) {
+                setImage(e.target.files[0]);
+              }
+            }}
+            className="border border-gray-600 rounded-lg p-2"
+          />
+          {/* Full Name */}
+          <motion.div variants={itemVariants}>
+            <InputField
+              id="fullName"
+              label="Full Name"
               type="text"
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              icon={User}
+              autoComplete="name"
+              error={
+                touchedFields.fullName ? errors.fullName?.message : undefined
+              }
+              success={touchedFields.fullName && !errors.fullName}
+              registration={register("fullName")}
             />
-          </div>
+          </motion.div>
 
           {/* Email */}
-          <div className="relative">
-            <FaEnvelope className="absolute left-4 top-4 text-gray-400" />
-
-            <input
+          <motion.div variants={itemVariants}>
+            <InputField
+              id="signup-email"
+              label="Email Address"
               type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              icon={Mail}
+              autoComplete="email"
+              error={touchedFields.email ? errors.email?.message : undefined}
+              success={touchedFields.email && !errors.email}
+              registration={register("email")}
             />
-          </div>
+          </motion.div>
 
           {/* Password */}
-          <div className="relative">
-            <FaLock className="absolute left-4 top-4 text-gray-400" />
-
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+          <motion.div variants={itemVariants} className="flex flex-col gap-2">
+            <PasswordInput
+              id="signup-password"
+              label="Password"
+              autoComplete="new-password"
+              error={
+                touchedFields.password ? errors.password?.message : undefined
+              }
+              success={touchedFields.password && !errors.password}
+              showCapsWarning
+              registration={register("password")}
             />
-          </div>
+            {passwordValue && <PasswordStrength password={passwordValue} />}
+          </motion.div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-300 text-white py-3 rounded-lg font-semibold"
-          >
-            Create Account
-          </button>
-
-          <div className="flex items-center gap-3">
-            <hr className="flex-1" />
-            <span className="text-gray-400 text-sm">OR</span>
-            <hr className="flex-1" />
-          </div>
-
-          <button
-            type="button"
-            className="w-full border py-3 rounded-lg flex items-center justify-center gap-3 hover:bg-gray-100 transition"
-          >
-            <FaGoogle className="text-red-500" />
-            Continue with Google
-          </button>
-
-          <p className="text-center text-sm text-gray-500">
-            Already have an account?{" "}
-            <Link
-              href="/signin"
-              className="text-blue-600 font-semibold hover:underline"
-            >
-              Sign In
-            </Link>
-          </p>
+          {/* Submit */}
+          <motion.div variants={itemVariants}>
+            <AuthButton isLoading={isSubmitting} disabled={isSubmitting}>
+              {isSubmitting ? "Creating account…" : "Create Account"}
+            </AuthButton>
+          </motion.div>
         </form>
-      </div>
-    </div>
+
+        {/* Divider */}
+        <motion.div variants={itemVariants}>
+          <Divider />
+        </motion.div>
+
+        {/* Social */}
+        <motion.div variants={itemVariants} className="flex gap-3">
+          <SocialButton
+            icon={<FaGoogle className="text-[#ea4335]" />}
+            label="Google"
+            disabled={isSubmitting}
+          />
+          <SocialButton
+            icon={<FaGithub className="text-white" />}
+            label="GitHub"
+            disabled={isSubmitting}
+          />
+        </motion.div>
+
+        {/* Footer link */}
+        <motion.p
+          variants={itemVariants}
+          className="text-center text-sm text-[#475569]"
+        >
+          Already have an account?{" "}
+          <Link
+            href="/signin"
+            className="text-[#4f8ef7] font-medium hover:text-white transition-colors"
+          >
+            Sign In
+          </Link>
+        </motion.p>
+      </motion.div>
+    </AuthLayout>
   );
 }

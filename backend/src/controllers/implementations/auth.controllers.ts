@@ -5,6 +5,7 @@ import { AuthService } from "../../services/implementations/auth/auth.service";
 import { IAuthService } from "../../services/interface/auth/auth.Iservice";
 import { HttpStatus } from "../../enum/httpStatus";
 import { setCookies } from "../../utils/cookies.utils";
+import { uploadToCloudinary } from "../../utils/cloudinaryUploads";
 
 @Service()
 export class AuthController implements IAuthController {
@@ -56,7 +57,16 @@ export class AuthController implements IAuthController {
   async signup(req: Request, res: Response): Promise<Response> {
     try {
       console.log("signup", req.body);
-      const datas = await this.authService.signup(req.body);
+      let image;
+
+    if (req.file) {
+
+      image = await uploadToCloudinary(req.file.path);
+
+      // Delete the local file after successful upload
+      fs.unlinkSync(req.file.path);
+    }
+      const datas = await this.authService.signup(req.body,image);
       console.log('datas',datas)
       return res.status(HttpStatus.OK).json({
         datas: datas,

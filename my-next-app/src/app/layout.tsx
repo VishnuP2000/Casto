@@ -1,20 +1,36 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const inter = Inter({
+  variable: '--font-inter',
+  subsets: ['latin'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "Casto",
-  description: "Connecting Talent with Creators",
+  title: {
+    default: 'Casto — Find Your Next Acting Opportunity',
+    template: '%s | Casto',
+  },
+  description:
+    "India's premier casting platform connecting actors, directors, casting agencies, and production houses.",
+  keywords: ['casting', 'auditions', 'actors', 'bollywood', 'OTT', 'acting jobs India'],
+  authors: [{ name: 'Casto' }],
+  creator: 'Casto Technologies',
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    siteName: 'Casto',
+    title: 'Casto — Find Your Next Acting Opportunity',
+    description:
+      'Connect actors, directors, casting agencies, and production houses in one modern platform.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Casto — Find Your Next Acting Opportunity',
+    description: "India's premier casting and audition platform.",
+  },
 };
 
 export default function RootLayout({
@@ -23,12 +39,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-     
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${inter.variable} scroll-smooth`}>
+      <body className="min-h-screen bg-[#050508] text-white antialiased font-sans">
+        {children}
+      </body>
     </html>
   );
 }
