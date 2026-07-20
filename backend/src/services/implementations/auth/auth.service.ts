@@ -1,4 +1,4 @@
-import { signinDto } from "../../../dto/user/auth.dtos";
+import { profileDto, signinDto } from "../../../dto/user/auth.dtos";
 import { HttpStatus } from "../../../enum/httpStatus";
 import { AuthResponse, signinResult } from "../../../interfaces/interfaces";
 import { UserRepository } from "../../../repositories/implementations/user.repository";
@@ -40,6 +40,7 @@ export class AuthService implements IAuthService {
         success: true,
         message: "Login successful",
         user: exist,
+        image:exist.image.url,
         accessToken,
         refreshToken,
       };
@@ -77,6 +78,7 @@ export class AuthService implements IAuthService {
         password: hashedPasswordResult,
         image:image,
       });
+      console.log('auth.service user ',user)
 
       return {
         success: true,
@@ -84,6 +86,22 @@ export class AuthService implements IAuthService {
       };
     } catch (error) {
       if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError("Signup failed", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  async getProfile(userId:profileDto):Promise<AuthResponse> {
+    try {
+      console.log('getProfiel AuthService')
+      const user=await this.userRepository.findById(userId)
+      console.log('user in Aut.service',user)
+      return {
+        success:true,
+        message:"successfull"
+      }
+    } catch (error) {
+            if (error instanceof AppError) {
         throw error;
       }
       throw new AppError("Signup failed", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -39,11 +39,10 @@ export function InputField({
   const [focused, setFocused] = useState(false);
   // const inputRef = useRef<HTMLInputElement>(null);
   const [hasValue, setHasValue] = useState(false);
-
-  console.log('enter the inputField')
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasValue(e.target.value.length > 0);
-    console.log('enter the handleChange')
+    // console.log('enter the handleChange')
     if (registration.onChange) {
       (
         registration.onChange as (e: React.ChangeEvent<HTMLInputElement>,) => void)(e);

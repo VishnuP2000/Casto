@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Film, ChevronDown } from 'lucide-react';
 import Button from './Button';
 import { useRouter } from 'next/navigation';
+import { profile } from '@/services/api/AuthServices';
+import { useAuth } from '@/context/AuthContext';
 
 const navLinks = [
   { label: 'Find Talent', href: '#' },
@@ -14,6 +16,9 @@ const navLinks = [
   { label: 'Pricing', href: '#' },
 ];
 
+interface userId{
+  id:string
+}
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -25,6 +30,15 @@ export default function Navbar() {
   }, []);
 
   const router=useRouter()
+  const {user}=useAuth()
+
+  const handleProfile = async (id:userId) => {
+    console.log('enter the handleProfile in navbar')
+    const response=await profile(id)
+    console.log('response',response)
+    router.push('/profile')
+  }
+  
 
   return (
     <>
@@ -75,7 +89,7 @@ export default function Navbar() {
               
               Get Started
             </Button>
-            <Button onClick={()=>router.push('/profile')}  size="sm" variant="gradient">
+            <Button onClick={()=>handleProfile(user?._id)}  size="sm" variant="gradient">
               
               profile
             </Button>

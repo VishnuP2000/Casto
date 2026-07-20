@@ -19,6 +19,7 @@ import {
   Divider,
 } from './AuthWidgets';
 import { signIn } from '@/services/api/AuthServices';
+import { useAuth } from '@/context/AuthContext';
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
@@ -61,6 +62,9 @@ function Toast({ type, message }: ToastProps) {
 export default function SignInForm() {
   const router = useRouter();
   const [toast, setToast] = useState<ToastProps | null>(null);
+  
+
+  const {setUser}=useAuth()
 
   const {
     register,
@@ -78,11 +82,16 @@ export default function SignInForm() {
     setToast(null);
     try {
       console.log('enter the Onsubmit signInForm')
-      await signIn({ email: data.email, password: data.password });
+      const response=await signIn({ email: data.email, password: data.password });
+      console.log('response+++',response)
+      setUser(response.user.user)
+      console.log('response+++',response.user.user)
+  localStorage.setItem("accessToken", response.user.accessToken);
+
       setToast({ type: 'success', message: 'Welcome back! Redirecting…' });
       setTimeout(() => router.push('/'), 1200);
     } catch (err: unknown) {
-      console.log('it is signIn error++')
+      console.log('it is signIn error++',err)
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
         'Invalid credentials. Please try again.';
