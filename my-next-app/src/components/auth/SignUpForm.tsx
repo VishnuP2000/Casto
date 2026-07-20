@@ -108,6 +108,7 @@ export default function SignUpForm() {
   const [success, setSuccess] = useState(false);
   const [image, setImage] = useState<File | null>(null);
 
+
   const {
     register,
     handleSubmit,
@@ -121,15 +122,21 @@ export default function SignUpForm() {
   const passwordValue = watch("password", "");
 
   const onSubmit = async (data: SignUpFormData) => {
+      const formdata = new FormData();
     setToast(null);
     console.log("enter the onsubmit");
     try {
-      await signUp({
-        name: data.fullName,
-        email: data.email,
-        password: data.password,
-        image:image
-      });
+      console.log("enter the formdata");
+      formdata.append("name", data.fullName);
+      formdata.append("email", data.email);
+      formdata.append("password", data.password);
+      
+      if (image) {
+        formdata.append("image", image);
+      }
+      console.log("enter the image");
+
+      await signUp(formdata);
       setSuccess(true);
       setTimeout(() => router.push("/signin"), 2000);
     } catch (err: unknown) {

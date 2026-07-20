@@ -21,6 +21,7 @@ export const signIn = async (data: { email: string; password: string }) => {
 // };
 
 export const signUp = async (formData: FormData) => {
+  console.log('enter the signUp')
   const response = await publicAxios.post("/user/signUp", formData);
 
   return response.data;

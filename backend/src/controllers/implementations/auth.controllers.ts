@@ -6,6 +6,7 @@ import { IAuthService } from "../../services/interface/auth/auth.Iservice";
 import { HttpStatus } from "../../enum/httpStatus";
 import { setCookies } from "../../utils/cookies.utils";
 import { uploadToCloudinary } from "../../utils/cloudinaryUploads";
+import fs from 'fs'
 
 @Service()
 export class AuthController implements IAuthController {
@@ -66,7 +67,7 @@ export class AuthController implements IAuthController {
       // Delete the local file after successful upload
       fs.unlinkSync(req.file.path);
     }
-      const datas = await this.authService.signup(req.body,image);
+      const datas = await this.authService.signup(req.body , image);
       console.log('datas',datas)
       return res.status(HttpStatus.OK).json({
         datas: datas,
