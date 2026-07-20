@@ -5,14 +5,11 @@ import { UserRepository } from "../../../repositories/implementations/user.repos
 import { IUserRepository } from "../../../repositories/interface/user/user.Irepository";
 import { AppError } from "../../../validations/customError";
 import { IAuthService } from "../../interface/auth/auth.Iservice";
-import Container, { Inject, Service } from "typedi";
+import { Container, Inject, Service } from "typedi";
 import bcrypt from "bcrypt";
 import { IBaseRepository } from "../../../repositories/interface/base.IRepository";
 import { IUser } from "../../../models/userModel";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-} from "../../../utils/jwt";
+import { generateAccessToken, generateRefreshToken } from "../../../utils/jwt";
 import { hashedPassword } from "../../../utils/password.hash";
 @Service()
 export class AuthService implements IAuthService {
@@ -24,7 +21,7 @@ export class AuthService implements IAuthService {
 
   async signin(data: signinDto): Promise<signinResult> {
     try {
-      console.log("AuthService", data);
+      console.log("AuthService", data.email);
       const exist = await this.userRepository.findUserByEmail(data.email);
       console.log("exist", exist);
       if (!exist) {
@@ -55,23 +52,30 @@ export class AuthService implements IAuthService {
       );
     }
   }
-  async signup(userData: signinDto): Promise<AuthResponse> {
+  async signup(
+    userData: signinDto,
+    image?: {
+      publicId: string;
+      url: string;
+    },
+  ): Promise<AuthResponse> {
     try {
+      let images;
       console.log("userData", userData);
       const { name, email, password } = userData;
-      const pass = password;
 
       const isExist = await this.userRepository.findUserByEmail(email);
       if (isExist) {
         throw new AppError("User already exists", HttpStatus.BAD_REQUEST);
       }
-      const hashedPasswordResult = await hashedPassword(password)
+      const hashedPasswordResult = await hashedPassword(password);
       console.log(hashedPasswordResult);
 
       const user = await this.userRepository.create({
         name: name,
         email: email,
         password: hashedPasswordResult,
+        image:image,
       });
 
       return {
@@ -87,5 +91,3 @@ export class AuthService implements IAuthService {
   }
 }
 export const authService = Container.get(AuthService);
-console.log(authService);
-console.log(typeof authService.signin);
