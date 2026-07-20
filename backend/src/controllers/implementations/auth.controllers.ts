@@ -46,6 +46,8 @@ export class AuthController implements IAuthController {
         success: true,
         message: "Signed in successfully",
         accessToken: user.accessToken,
+        user:user,
+        image:user.image
       });
     } catch (error) {
       console.log("signin backend error", error);
@@ -58,6 +60,7 @@ export class AuthController implements IAuthController {
   async signup(req: Request, res: Response): Promise<Response> {
     try {
       console.log("signup", req.body);
+      console.log("signup", req.file);
       let image;
 
     if (req.file) {
@@ -67,6 +70,7 @@ export class AuthController implements IAuthController {
       // Delete the local file after successful upload
       fs.unlinkSync(req.file.path);
     }
+    console.log('mage',image)
       const datas = await this.authService.signup(req.body , image);
       console.log('datas',datas)
       return res.status(HttpStatus.OK).json({
@@ -74,6 +78,21 @@ export class AuthController implements IAuthController {
       });
     } catch (error) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        meassage: "Failed to signup",
+      });
+    }
+  }
+  async getProfile (req:Request,res:Response): Promise<Response> {
+    try {
+      console.log('enter the getProfile')
+      const data=await this.authService.getProfile(req.body.userId)
+      console.log('data in controller',data)  
+      return res.status(HttpStatus.OK).json({
+        datas:data
+      })
+    } catch (error) {
+          return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         success: false,
         meassage: "Failed to signup",
       });

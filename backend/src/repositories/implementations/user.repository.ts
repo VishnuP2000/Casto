@@ -21,16 +21,16 @@ export class UserRepository extends BaseRepository<IUser>  implements IUserRepos
             throw new Error("Unknown error occurred in create");
          }
      }
-//     async create(data: Partial<IUser>): Promise<IUser> {
-//   try {
-//     const user = await this.create(data)
-//     return user;
-//   } catch (error) {
-//     if (error instanceof Error) {
-//       throw new Error(`Database Error (create): ${error.message}`);
-//     }
-//     throw new Error("Unknown error occurred in create");
-//   }
-// }
+     async findById (userId:string):Promise<IUser |null > {
+      try {
+         console.log('enter the findById',userId)
+         const user = await this.findById(userId)
+         return user
+      } catch (error) {
+         console.log('findById error in repository',error)
+          throw new Error("Unknown error occurred in create");
+
+      }
+     }
 }
 export const userRepository = Container.get(UserRepository)

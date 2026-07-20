@@ -5,6 +5,7 @@ const publicAxios = axios.create({
   baseURL:"http://localhost:4000",
   withCredentials: true,
 });
+
 // console.log("publicAxios he he he ",publicAxios)
 
 export default publicAxios;
